@@ -137,8 +137,6 @@ sub process_exch {
 		} elsif (@tds == 7) {
 			next if $tds[0]->as_text <= 10;
 			my $row = parse_row \@tds;
-			# we don't need these pairs data
-			next if $row->{currency_pair} eq 'BTC/USD' or $row->{currency_pair} eq 'BTC/USDT';
 			push @rows, $row;
 		} else {
 			die 'unexpected number of columns: ' . @tds;
@@ -177,9 +175,6 @@ sub main {
 			next;
 		} elsif (@tds == 6) {
 			my $row = parse_row \@tds;
-			# we don't need these pairs data
-			next if $row->{currency_pair} eq 'BTC/USD' or $row->{currency_pair} eq 'BTC/USDT';
-			next unless $row->{volume_24};
 			$exch_sum += $row->{volume_24};
 			$row->{exchange} = $exch_name;
 			push @exch_rows, $row;
@@ -212,6 +207,10 @@ sub main {
 
 	$dbh->begin_work;
 	for my $row (@exch_rows) {
+		# we don't need these pairs data
+		next if $row->{currency_pair} eq 'BTC/USD' or $row->{currency_pair} eq 'BTC/USDT';
+		next unless $row->{volume_24};
+
 		$row->{gathered_at_et} = $tstamp;
 		$row->{last_updated_utc} = $last_updated_utc;
 		$row->{last_updated_et} = $lu_et;
