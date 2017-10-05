@@ -68,8 +68,11 @@ sub init_db {
 	my ($dbh, $user, $pass);
 
 	unless ($opts{dev_db}) {
-		$user = 'sergey';
-		$pass = 'changeme';
+		my $content = do { open my $fh, '<', $ENV{HOME} . '/.my.cnf'; local $/; <$fh> };
+		for (split /\n/, $content) {
+			$user = $1 if /user=(.+)/;
+			$pass = $1 if /password=(.+)/;
+		}
 	}
 	$dbh = DBI->connect("dbi:mysql:scrape", $user, $pass) or die "Cannot connect: $DBI::errstr";
 	$dbh->{PrintError} = 0;
