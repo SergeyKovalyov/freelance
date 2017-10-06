@@ -105,7 +105,7 @@ sub get_json {
 	my ($url, $mark) = @_;
 
 	my $content = get_url $url;
-	die unless $content =~ m%$mark = ({"items":.+?})</script>%;
+	die 'unexpected JSON variable' unless $content =~ m%$mark = ({"items":.+?})</script>%;
 	return decode_json encode_utf8 $1;
 }
 
