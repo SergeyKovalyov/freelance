@@ -235,6 +235,7 @@ sub main {
 	say "# ", strftime "%Y-%m-%d %H:%M:%S: started", localtime;
 	my $dbh = init_db();
 
+	my %seen;
 	for my $url (qw{
 			https://sports.bovada.lv/football/nfl/game-lines-market-group
 			https://sports.bovada.lv/football/nfl/quarterback-props-market-group
@@ -256,7 +257,13 @@ sub main {
 		say "# no data for url: $url" unless @$json;
 
 		for my $game (@$json) {
-			my $json = get_json 'https://sports.bovada.lv' . $game->{link}, 'swc_game_view';
+			my $url = 'https://sports.bovada.lv' . $game->{link};
+			if ($seen{$url}) {
+				say "# already seen url: $url" if $opts{debug};
+				next;
+			}
+			my $json = get_json $url, 'swc_game_view';
+			$seen{$url} = 1;
 			$game = $json->{items}[0];
 
 			my $cmps = $game->{competitors};
